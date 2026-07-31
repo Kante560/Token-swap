@@ -1,5 +1,7 @@
 # SimpleSwap
 
+![CI](https://github.com/Kante560/token-swap/actions/workflows/test.yml/badge.svg)
+
 A minimal fixed-ratio token swap built with Foundry. Two ERC-20 tokens,
 a shared liquidity pool, and bidirectional swaps at a 2:1 ratio.
 
