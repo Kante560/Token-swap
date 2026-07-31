@@ -7,8 +7,6 @@ import {TokenA} from "../src/TokenA.sol";
 import {TokenB} from "../src/TokenB.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
-
-
 contract SimpleSwapTest is Test {
     SimpleSwap public swap;
     TokenA public tokenA;
@@ -94,7 +92,9 @@ contract SimpleSwapTest is Test {
         swap.addLiquidity(100e18, 50e18);
 
         //initialize swap
-        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector,address(swap),0,5e18));
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, address(swap), 0, 5e18)
+        );
         swap.swapBforA(5e18);
     }
 
@@ -106,11 +106,11 @@ contract SimpleSwapTest is Test {
         tokenA.transfer(alice, 100e18);
 
         vm.startPrank(alice);
-        tokenA.approve(address(swap),100e18);
+        tokenA.approve(address(swap), 100e18);
         swap.swapAforB(100e18);
         vm.stopPrank();
 
-        assertEq(tokenA.balanceOf(alice),0);
+        assertEq(tokenA.balanceOf(alice), 0);
         assertEq(tokenB.balanceOf(alice), 50e18);
     }
 
@@ -127,8 +127,5 @@ contract SimpleSwapTest is Test {
 
         assertEq(tokenA.balanceOf(address(swap)), 1100e18);
         assertEq(tokenB.balanceOf(address(swap)), 450e18);
-
-
     }
 }
- 

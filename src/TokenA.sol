@@ -10,8 +10,8 @@ contract TokenA is ERC20 {
 
     // function authorizeLiqidity() external {
 
-    //     tokenA.approve(msg.sender, amountA);       
+    //     tokenA.approve(msg.sender, amountA);
     //     swap.addLiquidity(amountA, amountB);
-        
+
     // }
 }

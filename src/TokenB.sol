@@ -8,8 +8,8 @@ contract TokenB is ERC20 {
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
     // function authorizeLiqidity() external {
-    //    tokenB.approve(msg.sender, amountB); 
-    //     swap.addLiquidity(amountA, amountB); 
+    //    tokenB.approve(msg.sender, amountB);
+    //     swap.addLiquidity(amountA, amountB);
 
     // }
 }
