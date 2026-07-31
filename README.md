@@ -40,3 +40,13 @@ math.
     anvil
     forge script script/Deploy.s.sol --rpc-url http://localhost:8545 \
       --private-key <key> --broadcast
+
+## Github Actions
+
+```bash
+# Trigger tests
+  gh workflow run test.yml
+
+# View workflow status
+  gh workflow view test.yml
+```# Token-swap
