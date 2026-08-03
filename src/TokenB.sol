@@ -7,6 +7,4 @@ contract TokenB is ERC20 {
     constructor() ERC20("TokenB", "TKB") {
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
-
-   
 }

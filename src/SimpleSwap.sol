@@ -35,38 +35,34 @@ contract SimpleSwap is ERC20 {
         uint256 amountA = _sumB * RATIO;
         require(amountA > 0, "amount too small");
         require(amountA <= reserveA, "low on token A");
-        tokenB.safeTransferFrom(msg.sender, address(this), _sumB); 
+        tokenB.safeTransferFrom(msg.sender, address(this), _sumB);
         tokenA.safeTransfer(msg.sender, amountA);
         emit SwappedBforA(msg.sender, _sumB, amountA);
     }
 
+    function addLiquidity(uint256 _amountA, uint256 _amountB) external returns (uint256 liquidity) {
+        require(_amountA > 0 && _amountB > 0, "zero deposit");
+        require(_amountA == _amountB * RATIO, "invalid ratio");
 
-function addLiquidity(uint256 _amountA, uint256 _amountB) external returns (uint256 liquidity) {
-    require(_amountA > 0 && _amountB > 0, "zero deposit");
-    require(_amountA == _amountB * RATIO, "invalid ratio");
+        uint256 reserveA = tokenA.balanceOf(address(this));
+        uint256 supply = totalSupply();
 
-    uint256 reserveA = tokenA.balanceOf(address(this)); 
-    uint256 supply = totalSupply();
+        if (supply == 0) {
+            liquidity = _amountA;
+        } else {
+            require(reserveA > 0, "reserve drained");
+            liquidity = (_amountA * supply) / reserveA;
+        }
 
-     
+        require(liquidity > 0, "insufficient liquidity minted");
 
-    if (supply == 0) {
-        liquidity = _amountA;                                 
-    } else {
-        require(reserveA > 0, "reserve drained");
-        liquidity = (_amountA * supply) / reserveA;
+        _mint(msg.sender, liquidity);
+
+        tokenA.safeTransferFrom(msg.sender, address(this), _amountA);
+        tokenB.safeTransferFrom(msg.sender, address(this), _amountB);
+
+        emit LiquidityAdded(msg.sender, _amountA, _amountB, liquidity);
     }
-
-    require(liquidity > 0, "insufficient liquidity minted");
-
-    _mint(msg.sender, liquidity);                           
-
-    tokenA.safeTransferFrom(msg.sender, address(this), _amountA);  
-    tokenB.safeTransferFrom(msg.sender, address(this), _amountB);
-
-    emit LiquidityAdded(msg.sender, _amountA, _amountB, liquidity);
-}
-
 
     function removeLiquidity(uint256 _liquidity) external {
         uint256 totalA = tokenA.balanceOf(address(this));
@@ -85,18 +81,11 @@ function addLiquidity(uint256 _amountA, uint256 _amountB) external returns (uint
         emit LiquidityRemoved(msg.sender, payableA, payableB);
     }
 
-    function ReserveA() external view returns(uint256){
+    function ReserveA() external view returns (uint256) {
         return tokenA.balanceOf(address(this));
     }
 
-    function ReserveB() external view returns(uint256){
+    function ReserveB() external view returns (uint256) {
         return tokenB.balanceOf(address(this));
     }
-
-
-
-
-    
-
-    
 }
