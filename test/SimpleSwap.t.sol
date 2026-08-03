@@ -5,7 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {SimpleSwap} from "../src/SimpleSwap.sol";
 import {TokenA} from "../src/TokenA.sol";
 import {TokenB} from "../src/TokenB.sol";
-import {IERC20Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
+import {
+    IERC20Errors
+} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 
 contract SimpleSwapTest is Test {
     SimpleSwap public swap;
@@ -93,7 +95,12 @@ contract SimpleSwapTest is Test {
 
         //initialize swap
         vm.expectRevert(
-            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, address(swap), 0, 5e18)
+            abi.encodeWithSelector(
+                IERC20Errors.ERC20InsufficientAllowance.selector,
+                address(swap),
+                0,
+                5e18
+            )
         );
         swap.swapBforA(5e18);
     }
@@ -128,4 +135,73 @@ contract SimpleSwapTest is Test {
         assertEq(tokenA.balanceOf(address(swap)), 1100e18);
         assertEq(tokenB.balanceOf(address(swap)), 450e18);
     }
+
+    function test_firstDepositorMintsBaseline() public {
+    tokenA.approve(address(swap), 200e18);
+    tokenB.approve(address(swap), 100e18);
+    uint256 lp = swap.addLiquidity(200e18, 100e18);
+
+    assertEq(lp, 200e18);             
+    assertEq(swap.totalSupply(), 200e18);
+    assertEq(swap.balanceOf(address(this)), 200e18);
+}
+
+function test_secondDepositorMintsProportionally() public {
+    tokenA.approve(address(swap), 200e18);
+    tokenB.approve(address(swap), 100e18);
+    swap.addLiquidity(200e18, 100e18);   // pool: 200 A / 100 B, supply 200
+
+    tokenA.transfer(alice, 100e18);
+    tokenB.transfer(alice, 50e18);
+
+    vm.startPrank(alice);
+    tokenA.approve(address(swap), 100e18);
+    tokenB.approve(address(swap), 50e18);
+    uint256 lp = swap.addLiquidity(100e18, 50e18);
+    vm.stopPrank();
+
+    // alice adds half the existing reserveA → mints half the existing supply
+    assertEq(lp, 100e18);
+    assertEq(swap.totalSupply(), 300e18);
+    assertEq(swap.balanceOf(alice), 100e18);
+}
+
+function test_removeLiquidityReturnsShare() public {
+    tokenA.approve(address(swap), 200e18);
+    tokenB.approve(address(swap), 100e18);
+    swap.addLiquidity(200e18, 100e18);
+
+    uint256 balABefore = tokenA.balanceOf(address(this));
+    uint256 balBBefore = tokenB.balanceOf(address(this));
+
+    swap.removeLiquidity(100e18);      
+
+    assertEq(tokenA.balanceOf(address(this)) - balABefore, 100e18);
+    assertEq(tokenB.balanceOf(address(this)) - balBBefore, 50e18);
+    assertEq(swap.totalSupply(), 100e18);
+    assertEq(swap.ReserveA(), 100e18);
+    assertEq(swap.ReserveB(), 50e18);
+}
+
+function test_removeAfterSwapReturnsDifferentComposition() public {
+    tokenA.approve(address(swap), 200e18);
+    tokenB.approve(address(swap), 100e18);
+    swap.addLiquidity(200e18, 100e18);   
+
+    tokenA.transfer(alice, 100e18);
+    vm.startPrank(alice);
+    tokenA.approve(address(swap), 100e18);
+    swap.swapAforB(100e18);             
+    vm.stopPrank();
+
+    uint256 balABefore = tokenA.balanceOf(address(this));
+    uint256 balBBefore = tokenB.balanceOf(address(this));
+
+    swap.removeLiquidity(200e18);       
+
+    assertEq(tokenA.balanceOf(address(this)) - balABefore, 300e18);
+    assertEq(tokenB.balanceOf(address(this)) - balBBefore, 50e18);
+    assertEq(swap.totalSupply(), 0);
+}
+
 }

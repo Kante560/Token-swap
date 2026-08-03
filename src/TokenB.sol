@@ -7,9 +7,6 @@ contract TokenB is ERC20 {
     constructor() ERC20("TokenB", "TKB") {
         _mint(msg.sender, 1000000 * 10 ** decimals());
     }
-    // function authorizeLiqidity() external {
-    //    tokenB.approve(msg.sender, amountB);
-    //     swap.addLiquidity(amountA, amountB);
 
-    // }
+   
 }
