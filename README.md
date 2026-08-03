@@ -16,6 +16,15 @@ swap contract on the token, then calls the swap, which pulls via
 `transferFrom`. All token movements use OpenZeppelin's `SafeERC20` to
 handle tokens that return `false` rather than reverting.
 
+
+## Liquidity provision
+
+Depositors receive `SS-LP` tokens representing a proportional claim on
+the pool. The first depositor sets the baseline; subsequent deposits mint
+`(amountA * totalSupply) / reserveA`. Burning LP tokens via
+`removeLiquidity` returns that fraction of both reserves as they stand at
+withdrawal time — which may differ in composition from what was deposited
+if trades occurred in between.
 ## Known limitations
 
 These are deliberate scope choices, not oversights:
